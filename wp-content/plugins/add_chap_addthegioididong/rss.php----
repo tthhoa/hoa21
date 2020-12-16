@@ -1,0 +1,219 @@
+<?php 
+
+//require_once('simple_html_dom.php');
+//shortcode::[post_items numble_post="3" post_type="portfolio_ze" cat="null" taxonomy="portfolio_cate" term="6" file='video' ]
+inset_autopost_link::init();
+$class= new inset_autopost_link();
+$obj = inset_autopost_link::getIntance();
+$obj ->init();
+class inset_autopost_link
+{
+   private $feed = array(); 
+   public $wp_version;
+  static function getIntance()
+   {
+     $obj = new inset_autopost_link;
+     return $obj;
+     
+   }
+  public  function init()
+    {
+        add_shortcode('feed',array($this,'fetch_feed_jzweb'));
+         add_shortcode('book',array($this,'book'));
+    }
+        function fetch_feed_jzweb()
+    {
+        //"div[@class='ze_titles']/h3"
+        //
+        //div[@class='thumbnail']/img/attribute::src
+        $DOMX_title="div[@class='ze_titles']/h3";
+        $DOMX_desc="div[@class='ze_titles']/h3/a/attribute::href";
+        $DOMX_link_title="div[@class='thumbnail']/img/attribute::src";
+        $DOMX_body="//div[@id='noidungtruyen']";
+        if(function_exists('fetch_feed'))
+        {
+           // Get a SimplePie feed object from the specified feed source.
+            $rss = 'http://truyenyy.com/doc-truyen/toan-chuc-cao-thu/chuong-1/';
+            $doc = new DOMDocument();
+            @$doc->loadHTMLFile( $rss );
+            $xpath = new DOMXPath($doc);
+            $sorr_title = $xpath->query($DOMX_body);
+            $results = array();
+            echo "<pre>";
+            print_r($doc);
+            
+            echo "</pre>"; exit();
+            foreach ($sorr_title as $entry) {
+        
+                // pass in the $entry node as the context node, the the query is relative to it
+                
+                $node = $xpath->query($DOMX_title, $entry); // returns a DOMNodeList
+                
+                $result['title'] = $node->item(0)->nodeValue; // get the first node in the list which is a DOMAttr
+                
+                $node = $xpath->query($DOMX_desc, $entry);
+                $result['desc'] = $node->item(0)->nodeValue;
+                
+                $node = $xpath->query($DOMX_link_title, $entry);// update link title
+                $result['link_title'] = $node->item(0)->nodeValue;
+                
+                $results[] = $result;
+            }
+            
+            $this ->feed=$results;
+           return $results;
+   
+        }
+    }
+       function fetch_feed_single($link)
+    {
+        //"div[@class='ze_titles']/h3"
+        //
+        //div[@class='thumbnail']/img/attribute::src
+        $DOMX_desc ="//div[@class='entry-content']";
+        $DOMX_desc1 ="//div[@class='entry']";
+        $DOMX_boby_desc="//div[@class='col-md-9 js_main_contnet']";
+        // Get a SimplePie feed object from the specified feed source.
+        $rss = $link;
+     
+        $doc = new DOMDocument();
+        @$doc->loadHTMLFile( $rss );
+        $xpath = new DOMXPath($doc);
+        $sorr_title = $xpath->query($DOMX_boby_desc);
+       
+        $results = '';
+        foreach ($sorr_title as $entry) {
+        // pass in the $entry node as the context node, the the query is relative to it                             
+            $node = $xpath->query($DOMX_desc, $entry);
+            $result['desc'] = $node->item(0)->nodeValue; 
+            $node = $xpath->query($DOMX_desc1, $entry);
+            $result['desc1'] = $node->item(0)->nodeValue;                              
+            $results .=  $result['desc'];
+            $results .= $result['desc1'];
+        }
+         
+       return $results;
+   
+        
+    }
+    
+    function check_post()
+    {
+        global $wpdb;
+        $prefix=$wpdb->posts;
+        $result =array();
+        $result = $wpdb->get_results (
+        "
+        SELECT K1.post_title,K1.post_type 
+        FROM $prefix K1
+        INNER JOIN $wpdb->postmeta K2
+        WHERE post_type='product_ze'
+        
+        
+        "
+        );
+     
+        return $result;   
+    }
+    function book()
+    {
+        global $post;
+        $arge=array(
+        'post_type'=>'truyenchu_ze',
+        'posts_per_page'=>'500',
+        );
+        $the_query = new WP_Query($arge);
+       echo "<select name='postselech' id='postselech' class='postform'>";
+         echo "<option value=''>Show All </option>";
+         
+        if($the_query->have_posts()):
+        while($the_query->have_posts()): $the_query->the_post();?>
+         <option value='<?php echo $post->ID; ?>' <?php if($postselech==get_the_ID($post->ID)){ echo 'selected="selected"';}; ?> ><?php echo get_the_title($post->ID) ?> </option>
+      <?php  endwhile;
+        
+        endif;
+        echo "</select>";
+
+    }
+    function  insets_post()
+    {
+        global $wpdp;
+        $str_check=array();
+        // Create post object
+       // $post = $this->fetch_feed_jzweb();
+       $post_inset=$this->fetch_feed_jzweb();
+       echo "<pre>";
+       print_r($post_inset);
+       
+       echo "</pre>";exit();
+       $post_check = $this ->check_post();
+       if(isset($post_check)&& !empty($post_check))
+       {
+            
+           foreach($post_check as $val){
+             $s2= str_replace(" ", "", $val->post_title);
+             $str_check[] =$s2;
+           }
+            
+            foreach($post_inset as $val2)
+            { 
+                $post_inset_description=$this->fetch_feed_single($val2['desc']);
+                $s1= str_replace(" ", "", $val2['title']);
+               
+               // echo $val2['title'].' 1  <br>';
+            
+                  if(in_array($s1,$str_check))
+                 { 
+                    echo $val2['title'].' giong <br>';
+                      
+                 }else{
+                     
+                    
+                     $my_post = array(
+                      'post_title'    => $val2['title'],
+                      'post_content'  => $post_inset_description,
+                      'post_status'   => 'publish',
+                      'post_author'   => 1,
+                      'post_type'     => 'product_ze',
+                      'post_excerpt'          => '',
+                      'post_category' => array()
+                       );
+               //    wp_insert_post( $my_post );
+                   echo 'da post';
+                 }
+            }
+            
+             
+           
+       }else
+       {
+            foreach($post_inset as $val2)
+            {
+              if( $val2['title'] = $val->post_title )
+             {
+                  echo 'truong';
+             }else{
+                echo 'la';
+                 $my_post = array(
+                  'post_title'    => $val2['title'],
+                  'post_content'  => 'truongtu.',
+                  'post_status'   => 'publish',
+                  'post_author'   => 1 );
+               // wp_insert_post( $my_post );
+             }
+            }
+       }
+        
+         
+        
+    // Insert the post into the database
+    //wp_insert_post( $my_post );
+    
+          
+    }
+}
+
+
+
+
+

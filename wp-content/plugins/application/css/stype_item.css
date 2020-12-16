@@ -1,0 +1,95 @@
+ul li {
+
+    list-style: outside none none;
+
+}
+
+.ze_list_items {
+
+    width: 100%;
+
+    margin:5px;
+
+}
+
+.ze_titles {
+
+    width: 100%;
+
+    text-align: center;
+
+}
+
+.ze_thumbnail {
+
+    margin: 14px 0 10px 0;
+
+}
+.aluminium {
+  float: left;
+  margin-bottom: 10px;
+  width: 100%;
+}
+.img-p {
+    float: left;
+    width: 30%;
+}
+.frame {
+    float: left;
+    width: 68%;
+    margin: 0 0 0 10px
+}
+.frame-p-1 {
+    float: left;
+    width: 100%;
+}
+.frame-p-2 {
+    float: left;
+}
+.frame-p-1 > p {
+    float: left;
+    width: 100%;
+}
+.chat > img {
+  float: left;
+  margin-top: -13px;
+}
+.chat > span {
+  float: left;
+}
+.star-y {
+  background: rgba(0, 0, 0, 0) url("../images/p3.png") repeat-x scroll center center;
+  float: right;
+  height: 19px;
+  margin-right: 22px;
+  margin-top: -36px;
+  width: 18%;
+}
+
+
+.paged_link {
+  float: left;
+  width: 100%;
+}
+a.page-numbers {
+  border: 1px solid #cdcdcd;
+  float: left;
+  margin-left: 1px;
+  text-decoration: none;
+}
+span.paging {
+  color: #cdcdcd;
+  float: left;
+  font-family: arial;
+  font-size: 18px;
+  padding: 8px 20px;
+}
+a.page-numbers:hover {
+    border: 1px solid #ecce1f;
+}
+a.page-numbers:hover span.paging {
+    color: #ecce1f;
+}
+.ze_archive h1{
+    margin: 0 0 5px 0;
+}
